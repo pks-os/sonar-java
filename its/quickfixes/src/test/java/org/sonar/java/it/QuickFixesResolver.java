@@ -66,7 +66,7 @@ public class QuickFixesResolver {
   public void scanAndApplyQuickFixes(List<InputFile> files) throws IOException {
     List<JavaFileScanner> visitors = new ArrayList<>(QuickFixTestUtils.CHECKS_WITH_QUICKFIX);
     SonarComponents sonarComponents = sonarComponents();
-    VisitorsBridgeForQuickFixes visitorsBridge = new VisitorsBridgeForQuickFixes(visitors, DEFAULT_CLASSPATH, sonarComponents, new JavaVersionImpl(21));
+    VisitorsBridgeForQuickFixes visitorsBridge = new VisitorsBridgeForQuickFixes(visitors, DEFAULT_CLASSPATH, sonarComponents, new JavaVersionImpl(22));
 
     JavaAstScanner astScanner = new JavaAstScanner(sonarComponents);
     astScanner.setVisitorBridge(visitorsBridge);
@@ -152,7 +152,7 @@ public class QuickFixesResolver {
     SonarComponents sonarComponents = new SonarComponents(null, fileSystem, classpathForMain, classpathForTest, null, null) {
       @Override
       public boolean reportAnalysisError(RecognitionException re, InputFile inputFile) {
-        throw new AssertionError(String.format("Should not fail analysis (%s)", re.getMessage()));
+        throw new AssertionError(String.format("Should not fail analysis for file %s: %s", inputFile.filename(), re.getMessage()));
       }
 
       @Override
