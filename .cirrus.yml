@@ -37,14 +37,12 @@ container_with_docker_definition: &CONTAINER_WITH_DOCKER_DEFINITION
   builder_role: cirrus-builder
   builder_image: docker-builder-v*
   builder_instance_type: t3.small
-  builder_subnet_id: ${CIRRUS_AWS_SUBNET}
 
 win_vm_definition: &WINDOWS_VM_DEFINITION
   experimental: true # see https://github.com/cirruslabs/cirrus-ci-docs/issues/1051
   platform: windows
   region: eu-central-1
   type: c5.4xlarge # 3.6 GHz (3.9GHz single core) Intel Xeon Scalable Processor, 16 vCPU, 32 GiB Memory
-  subnet_id: ${CIRRUS_AWS_SUBNET}
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
   only_if: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
@@ -94,6 +92,9 @@ test_analyze_task:
     - source cirrus-env BUILD
     # ignore duplications in the SE engine plugin, as it will be moved away from sonar-java at some point
     - PULL_REQUEST_SHA=$GIT_SHA1 regular_mvn_build_deploy_analyze -P-deploy-sonarsource,-release,-sign -Dmaven.deploy.skip=true -Dsonar.analysisCache.enabled=true -Dsonar.cpd.exclusions=java-symbolic-execution/**
+    - cd docs/java-custom-rules-example
+    - mvn clean package -f pom_SQ_10_6_LATEST.xml --batch-mode
+    - cd "${CIRRUS_WORKING_DIR}"
     - ./check-license-compliance.sh
   cleanup_before_cache_script: cleanup_maven_repository
 
