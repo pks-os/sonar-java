@@ -68,7 +68,6 @@ import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.measures.FileLinesContext;
 import org.sonar.api.measures.FileLinesContextFactory;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.testfixtures.log.LogAndArguments;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 import org.sonar.api.utils.Version;
 import org.sonar.check.Rule;
@@ -79,6 +78,7 @@ import org.sonar.java.model.GeneratedFile;
 import org.sonar.java.model.JParserTestUtils;
 import org.sonar.java.model.JavaTree;
 import org.sonar.java.reporting.AnalyzerMessage;
+import org.sonar.java.testing.ThreadLocalLogTester;
 import org.sonar.plugins.java.api.CheckRegistrar;
 import org.sonar.plugins.java.api.JavaCheck;
 import org.sonar.plugins.java.api.JspCodeVisitor;
@@ -137,7 +137,7 @@ class SonarComponentsTest {
   private SensorContext context;
 
   @RegisterExtension
-  public LogTesterJUnit5 logTester = new LogTesterJUnit5().setLevel(Level.DEBUG);
+  public ThreadLocalLogTester logTester = new ThreadLocalLogTester().setLevel(Level.DEBUG);
 
   @BeforeEach
   void setUp() {
@@ -233,7 +233,7 @@ class SonarComponentsTest {
       null, this.checkFactory, context.activeRules(), new CheckRegistrar[]{expectedRegistrar});
     sonarComponents.setSensorContext(context);
 
-    assertThat(logTester.getLogs()).isEmpty();
+    assertThat(logTester.logs()).isEmpty();
   }
 
   @Test
@@ -246,8 +246,9 @@ class SonarComponentsTest {
       null, this.checkFactory, context.activeRules(), new CheckRegistrar[]{expectedRegistrar});
     sonarComponents.setSensorContext(context);
 
-    assertThat(logTester.getLogs()).hasSize(2);
-    assertThat(logTester.getLogs().get(0).getRawMsg()).isEqualTo("Registered check: [{}]");
+    List<String> logs = logTester.rawMessages(Level.DEBUG);
+    assertThat(logs).hasSize(2);
+    assertThat(logs.get(0)).isEqualTo("Registered check: [{}]");
   }
 
   @Test
@@ -923,20 +924,20 @@ class SonarComponentsTest {
   @ParameterizedTest
   @MethodSource("fileCanBeSkipped_only_logs_on_first_call_input")
   void fileCanBeSkipped_only_logs_on_the_first_call(SonarComponents sonarComponents, InputFile inputFile, String logMessage) throws IOException {
-    assertThat(logTester.getLogs(Level.INFO)).isEmpty();
+    assertThat(logTester.logs(Level.INFO)).isEmpty();
 
     SensorContext contextMock = mock(SensorContext.class);
     sonarComponents.setSensorContext(contextMock);
     when(inputFile.contents()).thenReturn("");
     sonarComponents.fileCanBeSkipped(inputFile);
-    List<LogAndArguments> logs = logTester.getLogs(Level.INFO);
+    List<String> logs = logTester.rawMessages(Level.INFO);
     assertThat(logs).hasSize(1);
-    assertThat(logs.get(0).getRawMsg()).isEqualTo(logMessage);
+    assertThat(logs.get(0)).isEqualTo(logMessage);
 
     sonarComponents.fileCanBeSkipped(inputFile);
-    logs = logTester.getLogs(Level.INFO);
+    logs = logTester.rawMessages(Level.INFO);
     assertThat(logs).hasSize(1);
-    assertThat(logs.get(0).getRawMsg()).isEqualTo(logMessage);
+    assertThat(logs.get(0)).isEqualTo(logMessage);
   }
 
   private static Stream<Arguments> provideInputsFor_canSkipUnchangedFiles() {
@@ -955,7 +956,7 @@ class SonarComponentsTest {
   @ParameterizedTest
   @MethodSource("provideInputsFor_canSkipUnchangedFiles")
   void canSkipUnchangedFiles(@CheckForNull Boolean overrideFlagVal, @CheckForNull Boolean apiResponseVal,
-    @CheckForNull Boolean expectedResult) throws ApiMismatchException {
+                             @CheckForNull Boolean expectedResult) throws ApiMismatchException {
     SensorContextTester sensorContextTester = SensorContextTester.create(new File(""));
     SonarComponents sonarComponents = new SonarComponents(
       fileLinesContextFactory,

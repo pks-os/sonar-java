@@ -1,9 +1,12 @@
 package checks;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Locale;
 import java.util.Random;
 
 public class RedundantRecordMethodsCheckSample {
+
   record RedundantConstructorAndGetters(String name, int age) {
 
     static Object variable = null;
@@ -138,6 +141,61 @@ public class RedundantRecordMethodsCheckSample {
         return this.name;
       } else {
         return this.name;
+      }
+    }
+  }
+
+  record RecordWithConstructorAnnotation(String value) {
+    @JsonCreator
+    RecordWithConstructorAnnotation(@JsonProperty("myName") String value) { // Compliant: annotated
+      this.value = value;
+    }
+  }
+
+  record RecordWithParamAnnotation(String value) {
+    // The annotation can be applied to the component and the constructor can be removed.
+    RecordWithParamAnnotation(@JsonProperty("myName") String value) { // Noncompliant
+      this.value = value;
+    }
+  }
+
+  @interface MyAnnotation {}
+
+  record RecordWithCustomAnnotation(String value) {
+    @MyAnnotation
+    RecordWithCustomAnnotation(String value) { // Compliant: annotated
+      this.value = value;
+    }
+  }
+
+  record AssignmentInConstructor(int arg1, int arg2) {
+    public AssignmentInConstructor(int arg1, int arg2) { // Compliant
+      this.arg1 = arg1;
+      if (arg2 == 5) {
+        arg2 = 4;
+      }
+      this.arg2 = arg2;
+    }
+  }
+  record BranchInConstructor(int arg1, int arg2) {
+    public BranchInConstructor(int arg1, int arg2) { // Noncompliant
+      this.arg1 = arg1;
+      if (arg2 == 5) {
+        this.arg2 = arg2;
+      } else {
+        arg1 = 0;
+        this.arg2 = arg2;
+      }
+    }
+  }
+
+  record BranchInConstructor2(int arg1, int arg2) {
+    public BranchInConstructor2(int arg1, int arg2) { // Compliant
+      this.arg1 = arg1;
+      if (arg2 == 5) {
+        this.arg2 = arg2;
+      } else {
+        this.arg2 = 0;
       }
     }
   }

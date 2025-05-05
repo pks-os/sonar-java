@@ -1,5 +1,6 @@
 package checks.tests.AssertionsInTestsCheck;
 
+import io.spring.initializr.generator.test.buildsystem.maven.MavenBuildAssert;
 import java.util.List;
 import org.assertj.core.api.AbstractListAssert;
 import org.assertj.core.api.Assertions;
@@ -11,6 +12,11 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public abstract class AssertJ {
+
+  @Test
+  public void usingExtendedAssert() {
+    new MavenBuildAssert("Hello").hasPackaging("war");
+  }
 
   interface Visitor {
     void visit(Object object);
@@ -248,4 +254,19 @@ public abstract class AssertJ {
     new java.util.ArrayList<Boolean>().forEach(java.util.Objects::isNull);
   }
 
+  @Test
+  public void bdd_assertions_then_no_exception_is_thrown_by(){
+    org.assertj.core.api.BDDAssertions.thenNoException() // Compliant
+      .isThrownBy(() -> { throw new Throwable(); });
+  }
+
+  @Test
+  public void bdd_assertions_then_no_exception_as() { // Noncompliant
+    org.assertj.core.api.BDDAssertions.thenNoException().as("description");
+  }
+
+  @Test
+  public void bdd_assertions_then_true_is_true(){
+    org.assertj.core.api.BDDAssertions.then(true).isTrue(); // Compliant
+  }
 }

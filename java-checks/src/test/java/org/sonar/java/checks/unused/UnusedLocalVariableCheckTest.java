@@ -16,6 +16,7 @@
  */
 package org.sonar.java.checks.unused;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.sonar.java.checks.verifier.CheckVerifier;
 import org.sonar.java.checks.verifier.TestUtils;
@@ -23,11 +24,32 @@ import org.sonar.java.checks.verifier.TestUtils;
 class UnusedLocalVariableCheckTest {
 
   @Test
-  void test() {
+  void test_all_versions() {
+    List<Integer> versions = List.of(20, 21, 22);
+    for(int version : versions) {
+      CheckVerifier.newVerifier()
+        .onFile(TestUtils.mainCodeSourcesPath("checks/unused/UnusedLocalVariableCheck.java"))
+        .withCheck(new UnusedLocalVariableCheck())
+        .withJavaVersion(version)
+        .verifyIssues();
+    }
+  }
+
+  @Test
+  void test_java22() {
     CheckVerifier.newVerifier()
-      .onFile(TestUtils.mainCodeSourcesPath("checks/unused/UnusedLocalVariableCheck.java"))
+      .onFile(TestUtils.mainCodeSourcesPath("checks/unused/UnusedLocalVariableCheck_java22.java"))
       .withCheck(new UnusedLocalVariableCheck())
       .withJavaVersion(22)
+      .verifyIssues();
+  }
+
+  @Test
+  void test_java21() {
+    CheckVerifier.newVerifier()
+      .onFile(TestUtils.mainCodeSourcesPath("checks/unused/UnusedLocalVariableCheck_java21.java"))
+      .withCheck(new UnusedLocalVariableCheck())
+      .withJavaVersion(21)
       .verifyIssues();
   }
 
@@ -40,4 +62,27 @@ class UnusedLocalVariableCheckTest {
       .verifyIssues();
   }
 
+  @Test
+  void test_with_lambda() {
+    CheckVerifier.newVerifier()
+      .onFile(TestUtils.mainCodeSourcesPath("checks/unused/UnusedLocalVariableCheck_withLambda.java"))
+      .withCheck(new UnusedLocalVariableCheck())
+      .withJavaVersion(22)
+      .verifyIssues();
+  }
+
+  /**
+   * Test for false negative when a name is used in a lambda expression.
+   * See SONARJAVA-5504 for details.
+   */
+  @Test
+  void test_with_lambda_without_semantics() {
+    CheckVerifier.newVerifier()
+      .onFile(TestUtils.mainCodeSourcesPath("checks/unused/UnusedLocalVariableCheck_withLambda.java"))
+      .withCheck(new UnusedLocalVariableCheck())
+      .withJavaVersion(22)
+      .withoutSemantic()
+      // False negatives.
+      .verifyNoIssues();
+  }
 }

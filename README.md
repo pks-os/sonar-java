@@ -8,8 +8,8 @@ Features
 
 * 600+ rules (including 150+ bug detection rules and 350+ code smells)
 * Metrics (cognitive complexity, number of lines, etc.)
-* Import of [test coverage reports](https://docs.sonarqube.org/display/PLUG/Code+Coverage+by+Unit+Tests+for+Java+Project)
-* [Custom rules](https://docs.sonarqube.org/latest/analysis/languages/java/)
+* Import of [test coverage reports](https://docs.sonarsource.com/sonarqube-server/latest/analyzing-source-code/test-coverage/java-test-coverage/)
+* [Custom rules](https://docs.sonarsource.com/sonarqube-server/latest/analyzing-source-code/languages/java/#custom-rules)
 
 Useful links
 ------------
@@ -24,16 +24,16 @@ Useful links
 Have questions or feedback?
 ---------------------------
 
-To provide feedback (request a feature, report a bug, etc.) use the [Sonar Community Forum](https://community.sonarsource.com/). Please do not forget to specify the language (Java!), plugin version and SonarQube version.
+To provide feedback (request a feature, report a bug, etc.) use the [Sonar Community Forum](https://community.sonarsource.com/). Please do not forget to specify the language (Java!), plugin version and SonarQube Server version.
 
-If you have a question on how to use plugin (and the [docs](https://docs.sonarqube.org/latest/analysis/languages/java/) don't help you), we also encourage you to use the community forum.
+If you have a question on how to use plugin (and the [docs](https://docs.sonarsource.com/sonarqube-server/latest/analyzing-source-code/languages/java/) don't help you), we also encourage you to use the community forum.
 
 Contributing
 ------------
 
-### Topic in SonarQube Community Forum
+### Topic in Sonar Community Forum
 
-To request a new feature, please create a new thread in [SonarQube Community Forum](https://community.sonarsource.com/). Even if you plan to implement it yourself and submit it back to the community, please start a new thread first to be sure that we can use it.
+To request a new feature, please create a new thread in [Sonar Community Forum](https://community.sonarsource.com/). Even if you plan to implement it yourself and submit it back to the community, please start a new thread first to be sure that we can use it.
 
 ### Pull Request (PR)
 
@@ -41,7 +41,7 @@ To submit a contribution, create a pull request for this repository. Please make
 
 ### Custom Rules
 
-If you have an idea for a rule but you are not sure that everyone needs it you can implement a [custom rule](https://docs.sonarqube.org/latest/analysis/languages/java/) available only for you. Note that in order to help you, we highly recommend to first follow the [Custom Rules 101 tutorial](https://redirect.sonarsource.com/doc/java-custom-rules-guide.html) before diving directly into implementing rules from scratch.
+If you have an idea for a rule but you are not sure that everyone needs it you can implement a [custom rule](https://docs.sonarsource.com/sonarqube-server/latest/analyzing-source-code/languages/java/) available only for you. Note that in order to help you, we highly recommend to first follow the [Custom Rules 101 tutorial](https://redirect.sonarsource.com/doc/java-custom-rules-guide.html) before diving directly into implementing rules from scratch.
 
 ### Work with us
 Would you like to work on this project full-time? We are hiring! Check out https://www.sonarsource.com/hiring 
@@ -55,9 +55,9 @@ To run tests locally follow these instructions.
 
 ### Java versions
 
-You need `Java 22` to build the project and `Java 17` run the Integration Tests (ITs).
-* `Java 17` can be used to build and test all modules except under `java-checks-test-sources` that requires `Java 22`.
-* `Java 22` can be used to build and test all modules except under `its` that requires `Java 17` because of SQ incompatibility.
+You need `Java 23` to build the project and `Java 17` run the Integration Tests (ITs).
+* `Java 17` can be used to build and test all modules except under `java-checks-test-sources` that requires `Java 23`.
+* `Java 23` can be used to build and test all modules except under `its` that requires `Java 17` because of SQ incompatibility.
 
 ### Build the Project and Run Unit Tests
 
@@ -103,7 +103,7 @@ The "Plugin Test" is an integration test suite that verifies plugin features suc
 
     mvn clean install -Pit-plugin -DcommunityEditionTestsOnly=true
 
-Note for internal contributors: in order to also execute the tests that depend on the SonarQube Enterprise Edition, use:
+Note for internal contributors: in order to also execute the tests that depend on the SonarQube Server Enterprise Edition, use:
 
     mvn clean install -Pit-plugin
 
@@ -124,7 +124,7 @@ From the `its/ruling` folder, launch the ruling tests:
     # Alternatively
     JAVA_HOME=/my/local/java17/jdk/ mvn clean install -Pit-ruling -DcommunityEditionTestsOnly=true
 
-Note for internal contributors: in order to also execute the tests that depend on the SonarQube Enterprise Edition, use: 
+Note for internal contributors: in order to also execute the tests that depend on the SonarQube Server Enterprise Edition, use: 
 
     mvn clean install -Pit-ruling
 
@@ -151,7 +151,7 @@ For example using the command:
 #### Autoscan Test
 
 The tests in the [autoscan module](its/autoscan) are designed to detect differences between the issues the Java analyzer can find with and without bytecode.
-The goal here is to spot and fix the potential FPs, and verify the expected FNs between that would show up in [SonarCloud's automatic analysis](https://docs.sonarcloud.io/advanced-setup/automatic-analysis/).
+The goal here is to spot and fix the potential FPs, and verify the expected FNs between that would show up in [SonarQube Cloud's automatic analysis](https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/automatic-analysis/).
 
 Running this test can be broken down in 2 steps:
 
@@ -160,11 +160,11 @@ Running this test can be broken down in 2 steps:
 
 ##### Compiling the test sources
 
-Make sure that the `java-checks-tests-sources` module has been compiled (ie: the .class files in `java-checks-tests-sources/target/` are up to date).
+Make sure that the `java-checks-test-sources` module has been compiled (ie: the .class files in `java-checks-test-sources/target/` are up to date).
 
-In doubt, go the [`java-checks-tests-sources`](java-checks-tests-sources) module and run:
+In doubt, go the [`java-checks-test-sources`](java-checks-tests-sources) module and run:
 ```shell
-# Use java 22!
+# Use java 23!
 mvn clean compile
 ```
 

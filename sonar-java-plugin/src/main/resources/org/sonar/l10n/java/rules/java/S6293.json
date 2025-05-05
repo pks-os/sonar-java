@@ -13,7 +13,8 @@
     "constantCost": "5min"
   },
   "tags": [
-    "cwe"
+    "cwe",
+    "android"
   ],
   "defaultSeverity": "Major",
   "ruleSpecification": "RSPEC-6293",
@@ -25,6 +26,9 @@
     ],
     "OWASP Mobile": [
       "M4"
+    ],
+    "OWASP Mobile Top 10 2024": [
+      "M3"
     ],
     "MASVS": [
       "MSTG-AUTH-8"

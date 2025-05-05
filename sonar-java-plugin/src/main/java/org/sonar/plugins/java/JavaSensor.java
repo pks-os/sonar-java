@@ -104,7 +104,10 @@ public class JavaSensor implements Sensor {
 
     Measurer measurer = new Measurer(context, noSonarFilter);
 
-    JavaFrontend frontend = new JavaFrontend(getJavaVersion(), sonarComponents, measurer, javaResourceLocator, postAnalysisIssueFilter,
+    JavaVersion javaVersion = getJavaVersion();
+    context.addTelemetryProperty("java.language.version", javaVersion.toString());
+
+    JavaFrontend frontend = new JavaFrontend(javaVersion, sonarComponents, measurer, javaResourceLocator, postAnalysisIssueFilter,
       sonarComponents.mainChecks().toArray(new JavaCheck[0]));
     frontend.scan(getSourceFiles(), getTestFiles(), runJasper(context));
 
@@ -169,7 +172,7 @@ public class JavaSensor implements Sensor {
     }
     String enablePreviewAsString = settings.get(JavaVersion.ENABLE_PREVIEW).orElse("false");
 
-    JavaVersion javaVersion = JavaVersionImpl.fromStrings(javaVersionAsString.get(), enablePreviewAsString);
+    JavaVersion javaVersion = JavaVersionImpl.fromString(javaVersionAsString.get(), enablePreviewAsString);
     if (javaVersion.arePreviewFeaturesEnabled() && javaVersion.asInt() < JavaVersionImpl.MAX_SUPPORTED) {
       LOG.warn("sonar.java.enablePreview is set but will be discarded as the Java version is less than the max" +
         " supported version ({} < {})", javaVersion.asInt(), JavaVersionImpl.MAX_SUPPORTED);

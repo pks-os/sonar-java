@@ -1,9 +1,5 @@
 package checks.unused;
 
-import org.hibernate.validator.internal.engine.validationcontext.ValidatorScopedContext;
-
-import java.util.Arrays;
-import java.util.List;
 import java.util.Queue;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -17,7 +13,6 @@ class UnusedLocalVariableCheck {
 
   {
     int unused = 42; // Noncompliant
-    int _ = 42; // Compliant
     int used = 23; // Compliant
     System.out.println(used);
   }
@@ -43,13 +38,6 @@ class UnusedLocalVariableCheck {
 
     try {
     } catch (Exception e) {
-    }
-
-    try (Stream foo = Stream.of()) { // Compliant
-    } catch (Exception _) {
-    }
-
-    for (int a : new int[]{0, 1, 2}) { // Noncompliant
     }
 
     for (int i = 0; condition(); i++) { // Noncompliant
@@ -258,129 +246,6 @@ class UnusedLocalVariableCheck {
       for (int counter = 0; condition(); counter++) { // Noncompliant [[quickfixes=!]]
 //             ^^^^^^^
       }
-    }
-
-    void test() {
-      record Bar(int used) { } // Compliant
-      System.out.println(new Bar(42).used);
-    }
-  }
-
-  sealed interface Shape permits Box, Circle {}
-  record Box() implements Shape { }
-  record Circle() implements Shape {}
-
-  static void switchOnSealedClass(Shape shape) {
-    switch (shape) {
-      case Box unused -> { } // compliant
-      case Circle circle -> circle.toString();
-    }
-  }
-
-  static void switchWithTypePattern(Object o) {
-    switch (o) {
-      case Number used -> used.longValue();
-      case Shape unused -> { } // compliant
-      default -> System.out.println();
-    }
-  }
-
-  record MyRecord(int x, int y) { }
-
-  static void switchRecordGuardedPattern(Object o) {
-    switch(o) {
-      case MyRecord(int x, int y) when x > 42 -> { } // Compliant
-      case MyRecord(int x, int y) when y < 42 -> { } // Compliant
-      case MyRecord m when m.x > 42 -> { }
-      case MyRecord m when o.toString().length() > 42 -> { } // Compliant
-      case MyRecord(int x, int y) -> { } // Compliant
-      case MyRecord m -> { } // Compliant
-      case Object object -> {
-        object.toString();
-        var x = 42; // Noncompliant
-        System.out.println();
-      }
-    }
-  }
-
-  abstract class Ball {}
-  final class RedBall extends Ball {}
-  final class BlueBall extends Ball {}
-  final class GreenBall extends Ball {}
-
-  record BallHolder<T extends Ball>(T ball) { }
-
-  record Point(int x, int y) { }
-  record ColoredPoint(Point p, String color) { }
-
-  void unnamedVariablesUseCases(Queue<Ball> queue, BallHolder<? extends Ball> ballHolder, ColoredPoint coloredPoint) {
-    int total = 0;
-    int _ = 1 + 1;
-    java.util.function.IntUnaryOperator _ = (int _) -> 0;
-    java.util.function.IntUnaryOperator _ = _ -> 0;
-    java.util.function.IntBinaryOperator _ = (_,_) -> 0;
-    java.util.function.IntBinaryOperator _ = (int _, int _) -> 0;
-    for(Object _ : queue) { // Compliant
-      total++;
-    }
-    System.out.println(total);
-    for (int i = 0, _ = 1 + 1; i < 2; i++) {
-      System.out.println(i);
-    }
-    while(queue.size() > 2) {
-      var a = queue.remove();
-      var _ = queue.remove(); // Compliant
-      System.out.println(a);
-    }
-
-    try (var _ = new java.io.FileInputStream("foo.txt")) {
-      queue.remove();
-    } catch (Exception _) { // Compliant
-      System.out.println("Exception");
-    }
-
-    queue.stream()
-      .collect(Collectors.toMap(Function.identity(), _ -> 42)); // Compliant
-
-    var ball = queue.remove();
-    switch (ball) {
-      case RedBall _ -> System.out.println("Red"); // Compliant
-      case BlueBall _ -> System.out.println("Blue"); // Compliant
-      default -> throw new IllegalStateException("Unexpected value: " + ball);
-    }
-
-    switch (ballHolder) {
-      case BallHolder(RedBall _) -> System.out.println("One Red"); // Compliant
-      // FIXME: the following line is commented because ECJ 3.39.0 is not able to parse it, Syntax error on the second _.
-      // case BallHolder(BlueBall _), BallHolder(GreenBall _) -> System.out.println("Blue or Green Ball"); // Compliant
-      case BallHolder(var _) -> System.out.println("Other"); // Compliant
-    }
-
-    switch (ballHolder) {
-      // FIXME: the following line is commented because ECJ 3.39.0 is not able to parse it, Syntax error on the second _.
-      // case BallHolder(RedBall _), BallHolder(BlueBall _) -> System.out.println("Red or Blue Ball"); // Compliant
-      case BallHolder(_) -> System.out.println("Other Ball"); // Compliant
-      default -> System.out.println("Other Ball");
-    }
-
-    if(ballHolder instanceof BallHolder(RedBall _)) { // Compliant
-      System.out.println("BallHolder with RedBall");
-    }
-
-    if(coloredPoint instanceof ColoredPoint(Point(_, _), _)) { // Compliant
-      System.out.println("Point (_:_) with color not important");
-    }
-
-    if(coloredPoint instanceof ColoredPoint(Point(int x, int y), _)) { // Compliant
-      System.out.println("Point ("+ x  + ":"  + y + ") with color not important");
-    }
-
-    if(coloredPoint instanceof ColoredPoint(Point(int x, int _), _)) { // Compliant
-      System.out.println("Point ("+ x  + ":_) with color not important");
-    }
-
-    if(coloredPoint instanceof ColoredPoint(Point(_, int y), _)) { // Compliant
-      System.out.println("Point (_:" + y + ") with color not important");
     }
   }
 }

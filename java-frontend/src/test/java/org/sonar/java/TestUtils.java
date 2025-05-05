@@ -19,6 +19,9 @@ package org.sonar.java;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 
@@ -115,5 +118,13 @@ public class TestUtils {
     } catch (Exception e) {
       throw new IllegalStateException(String.format("Unable to read file '%s", file.getAbsoluteFile()));
     }
+  }
+
+  private static List<String> filterOutAnalysisProgressLogLines(Stream<String> logs) {
+    return logs.filter(log -> !log.matches("[0-9]+% analyzed")).toList();
+  }
+
+  public static List<String> filterOutAnalysisProgressLogLines(List<String> logs) {
+    return filterOutAnalysisProgressLogLines(logs.stream());
   }
 }

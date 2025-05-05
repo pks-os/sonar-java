@@ -40,7 +40,8 @@ public class JavaVersionImpl implements JavaVersion {
   private static final int JAVA_20 = 20;
   private static final int JAVA_21 = 21;
   private static final int JAVA_22 = 22;
-  public static final int MAX_SUPPORTED = JAVA_22;
+  private static final int JAVA_23 = 23;
+  public static final int MAX_SUPPORTED = JAVA_23;
 
   private final int javaVersion;
   private final boolean previewFeaturesEnabled;
@@ -59,19 +60,14 @@ public class JavaVersionImpl implements JavaVersion {
   }
 
   public static JavaVersion fromString(String javaVersion) {
-    try {
-      int versionAsInt = convertJavaVersionString(javaVersion);
-      return new JavaVersionImpl(versionAsInt);
-    } catch (NumberFormatException e) {
-      LOG.warn("Invalid java version (got \"{}\"). "
-        + "The version will be ignored. Accepted formats are \"1.X\", or simply \"X\" "
-        + "(for instance: \"1.5\" or \"5\", \"1.6\" or \"6\", \"1.7\" or \"7\", etc.)", javaVersion);
-      return new JavaVersionImpl();
-    }
+    return fromString(javaVersion, false);
   }
 
-  public static JavaVersion fromStrings(String javaVersion, String previewFeaturesFlag) {
-    boolean previewFeaturesEnabled = convertBooleanString(previewFeaturesFlag);
+  public static JavaVersion fromString(String javaVersion, String previewFeaturesFlag) {
+    return fromString(javaVersion, convertBooleanString(previewFeaturesFlag));
+  }
+
+  private static JavaVersion fromString(String javaVersion, boolean previewFeaturesEnabled) {
     try {
       int versionAsInt = convertJavaVersionString(javaVersion);
       return new JavaVersionImpl(versionAsInt, previewFeaturesEnabled);
@@ -156,6 +152,11 @@ public class JavaVersionImpl implements JavaVersion {
   @Override
   public boolean isJava22Compatible() {
     return JAVA_22 <= javaVersion;
+  }
+
+  @Override
+  public boolean isJava23Compatible() {
+    return JAVA_23 <= javaVersion;
   }
 
   private boolean notSetOrAtLeast(int requiredJavaVersion) {

@@ -59,7 +59,7 @@ class SyntaxHighlighterVisitorTest {
   private SyntaxHighlighterVisitor syntaxHighlighterVisitor;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     context = SensorContextTester.create(temp.getRoot());
     sonarComponents = new SonarComponents(mock(FileLinesContextFactory.class), context.fileSystem(),
       mock(ClasspathForMain.class), mock(ClasspathForTest.class), mock(CheckFactory.class), mock(ActiveRules.class));
@@ -152,9 +152,10 @@ class SyntaxHighlighterVisitorTest {
     assertThatHasNotBeenHighlighted(componentKey, 15, 12, 15, 16); // with
     assertThatHasNotBeenHighlighted(componentKey, 16, 12, 16, 16); // uses
     assertThatHasNotBeenHighlighted(componentKey, 17, 5, 17, 13); // provides
-    assertThatHasBeenHighlighted(componentKey, 20, 3, 20, 11, TypeOfText.KEYWORD); // abstract
-    assertThatHasBeenHighlighted(componentKey, 20, 12, 20, 16, TypeOfText.KEYWORD); // void
-    assertThatHasNotBeenHighlighted(componentKey, 20, 17, 20, 25); // provides
+    assertThatHasBeenHighlighted(componentKey, 20, 3, 21, 28, TypeOfText.STRUCTURED_COMMENT); // markdown javadoc
+    assertThatHasBeenHighlighted(componentKey, 22, 3, 22, 11, TypeOfText.KEYWORD); // abstract
+    assertThatHasBeenHighlighted(componentKey, 22, 12, 22, 16, TypeOfText.KEYWORD); // void
+    assertThatHasNotBeenHighlighted(componentKey, 22, 17, 22, 25); // provides
   }
 
   @Test

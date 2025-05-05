@@ -32,11 +32,15 @@ import org.sonar.plugins.java.api.IssuableSubscriptionVisitor;
 import org.sonar.plugins.java.api.semantic.Symbol;
 import org.sonar.plugins.java.api.tree.AssignmentExpressionTree;
 import org.sonar.plugins.java.api.tree.CaseLabelTree;
+import org.sonar.plugins.java.api.tree.ForEachStatement;
 import org.sonar.plugins.java.api.tree.IdentifierTree;
 import org.sonar.plugins.java.api.tree.ListTree;
+import org.sonar.plugins.java.api.tree.RecordPatternTree;
 import org.sonar.plugins.java.api.tree.SyntaxToken;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.VariableTree;
+
+import static org.sonar.java.model.ExpressionUtils.skipParenthesesUpwards;
 
 @Rule(key = "S1481")
 public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
@@ -50,8 +54,7 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
 
   private static final String MESSAGE = "Remove this unused \"%s\" local variable.";
 
-  private static final UnresolvedIdentifiersAndSwitchCaseVisitor UNRESOLVED_IDENTIFIERS_AND_SWITCH_CASE_VISITOR =
-    new UnresolvedIdentifiersAndSwitchCaseVisitor();
+  private static final IdentifierProperties IDENTIFIER_PROPERTIES = new IdentifierProperties();
 
   @Override
   public List<Tree.Kind> nodesToVisit() {
@@ -61,7 +64,7 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
   @Override
   public void visitNode(Tree tree) {
     if (tree.is(Tree.Kind.COMPILATION_UNIT)) {
-      UNRESOLVED_IDENTIFIERS_AND_SWITCH_CASE_VISITOR.check(tree);
+      IDENTIFIER_PROPERTIES.check(tree);
     }
   }
 
@@ -71,8 +74,9 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
       VariableTree variable = (VariableTree) tree;
       IdentifierTree simpleName = variable.simpleName();
       if (!simpleName.isUnnamedVariable()) {
-        boolean unresolved = UNRESOLVED_IDENTIFIERS_AND_SWITCH_CASE_VISITOR.isUnresolved(simpleName.name());
-        if (!unresolved && isProperLocalVariable(variable) && isUnused(variable.symbol())) {
+        // If a variable with the same name as this is unresolved, we can't be sure it's not a usage of this. So we can't raise an issue.
+        boolean unresolved = IDENTIFIER_PROPERTIES.isUnresolved(simpleName.name());
+        if (!unresolved && isProperLocalVariable(variable) && isUnused(variable.symbol()) && canBeReplaced(variable)) {
           QuickFixHelper.newIssue(context)
             .forRule(this)
             .onTree(simpleName)
@@ -83,6 +87,17 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
       }
     }
 
+  }
+
+  /**
+   * Before Java 22 it was not possible to remove the variable in a foreach statement or try with resources even it is unused.
+   * For instance in {@code for (String element : list) {}}, it is only since Java 22 that it can be rewritten {@code for (var _ : list) {}}.
+   */
+  private boolean canBeReplaced(VariableTree variable) {
+    return context.getJavaVersion().isJava22Compatible()
+      || (!isForeachVariable(variable)
+        && !isTryResource(variable)
+        && !isTypePatternWithinCaseOrRecord(variable));
   }
 
   private static boolean isUnused(Symbol symbol) {
@@ -102,20 +117,11 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
     return !(parent.is(INCREMENT_KINDS) && parent.parent().is(Tree.Kind.EXPRESSION_STATEMENT));
   }
 
-  private static Tree skipParenthesesUpwards(Tree tree) {
-    while (tree.is(Tree.Kind.PARENTHESIZED_EXPRESSION)) {
-      tree = tree.parent();
-    }
-    return tree;
-  }
-
   private static boolean isProperLocalVariable(VariableTree variable) {
     Symbol symbol = variable.symbol();
     return symbol.isLocalVariable()
       && !symbol.isParameter()
-      && !isDefinedInCatchClause(variable)
-      && !isTryResource(variable)
-      && !UNRESOLVED_IDENTIFIERS_AND_SWITCH_CASE_VISITOR.isSwitchPatternVariable(variable);
+      && !isDefinedInCatchClause(variable);
   }
 
   private static boolean isDefinedInCatchClause(VariableTree variable) {
@@ -126,13 +132,36 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
     return variable.parent().is(Tree.Kind.LIST) && variable.parent().parent().is(Tree.Kind.TRY_STATEMENT);
   }
 
+  private static boolean isForeachVariable(VariableTree variable) {
+    return variable.parent() instanceof ForEachStatement;
+  }
+
   private static List<JavaQuickFix> computeQuickFix(VariableTree variable) {
+    if (isForeachVariable(variable)
+      || isTryResource(variable)
+      || isTypePatternWithinCaseOrRecord(variable)) {
+      return List.of(makeQuickFixReplacingWithUnnamedVariable(variable));
+    }
     return getQuickFixTextSpan(variable).map(textSpan -> Collections.singletonList(
-        JavaQuickFix.newQuickFix("Remove unused local variable")
-          .addTextEdit(JavaTextEdit.removeTextSpan(textSpan))
-          .build()
-      )
-    ).orElseGet(Collections::emptyList);
+      JavaQuickFix.newQuickFix("Remove unused local variable")
+        .addTextEdit(JavaTextEdit.removeTextSpan(textSpan))
+        .build()))
+      .orElseGet(Collections::emptyList);
+  }
+
+  private static boolean isTypePatternWithinCaseOrRecord(VariableTree variable) {
+    return IDENTIFIER_PROPERTIES.isVariableInsideCase(variable)
+      || IDENTIFIER_PROPERTIES.isVariableInsideRecordPattern(variable);
+  }
+
+  private static JavaQuickFix makeQuickFixReplacingWithUnnamedVariable(VariableTree variable) {
+    return JavaQuickFix.newQuickFix("Replace unused local variable with _")
+      // This works with both enhanced for loop and try-with-resources.
+      // In the latter case we keep the initializer:
+      // `for(int elem: elems)` turns into `for(var _: elems)`
+      // `try(Resource res = initializer())` turns into `try(var _ = initializer ())`
+      .addTextEdit(JavaTextEdit.replaceBetweenTree(variable.type(), true, variable.simpleName(), true, "var _"))
+      .build();
   }
 
   private static Optional<AnalyzerMessage.TextSpan> getQuickFixTextSpan(VariableTree variable) {
@@ -177,19 +206,34 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
     return QuickFixHelper.previousVariable(variable).map(VariableTree::lastToken);
   }
 
-  private static class UnresolvedIdentifiersAndSwitchCaseVisitor extends UnresolvedIdentifiersVisitor {
-    private final Set<VariableTree> switchPatternVariables = new HashSet<>();
+  private static class IdentifierProperties extends UnresolvedIdentifiersVisitor {
+    private final Set<VariableTree> patternVariables = new HashSet<>();
+    private final Set<VariableTree> caseVariables = new HashSet<>();
+    private int nestingRecordLevel = 0;
     private boolean withinCaseLabel = false;
 
     @Override
     public Set<String> check(Tree tree) {
-      switchPatternVariables.clear();
+      patternVariables.clear();
+      caseVariables.clear();
+      nestingRecordLevel = 0;
       withinCaseLabel = false;
       return super.check(tree);
     }
 
-    public boolean isSwitchPatternVariable(VariableTree variable) {
-      return switchPatternVariables.contains(variable);
+    public boolean isVariableInsideRecordPattern(VariableTree variable) {
+      return patternVariables.contains(variable);
+    }
+
+    public boolean isVariableInsideCase(VariableTree variable) {
+      return caseVariables.contains(variable);
+    }
+
+    @Override
+    public void visitRecordPattern(RecordPatternTree tree) {
+      nestingRecordLevel += 1;
+      super.visitRecordPattern(tree);
+      nestingRecordLevel -= 1;
     }
 
     @Override
@@ -201,8 +245,11 @@ public class UnusedLocalVariableCheck extends IssuableSubscriptionVisitor {
 
     @Override
     public void visitVariable(VariableTree tree) {
+      if (nestingRecordLevel > 0) {
+        patternVariables.add(tree);
+      }
       if (withinCaseLabel) {
-        switchPatternVariables.add(tree);
+        caseVariables.add(tree);
       }
       super.visitVariable(tree);
     }

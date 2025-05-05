@@ -35,11 +35,39 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#ase-assertion-with-side-effect-method"
   },
   {
+    "key": "AT_NONATOMIC_64BIT_PRIMITIVE",
+    "name": "Multi-threading - This write of this 64-bit primitive variable may not atomic",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#at-nonatomic-64bit-primitive"
+  },
+  {
+    "key": "AT_NONATOMIC_OPERATIONS_ON_SHARED_VARIABLE",
+    "name": "Multi-threading - Operation on shared variable is not atomic",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#at-nonatomic-operations-on-shared-variable"
+  },
+  {
     "key": "AT_OPERATION_SEQUENCE_ON_CONCURRENT_ABSTRACTION",
     "name": "Multi-threading - Sequence of calls to concurrent abstraction may not be atomic",
     "type": "BUG",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#at-operation-sequence-on-concurrent-abstraction"
+  },
+  {
+    "key": "AT_STALE_THREAD_WRITE_OF_PRIMITIVE",
+    "name": "Multi-threading - This write of this shared primitive variable may not be visible to other threads",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#at-stale-thread-write-of-primitive"
+  },
+  {
+    "key": "AT_UNSAFE_RESOURCE_ACCESS_IN_THREAD",
+    "name": "Multi-threading - Operation on resource is not safe in a multithreaded context",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#at-unsafe-resource-access-in-thread"
   },
   {
     "key": "BAC_BAD_APPLET_CONSTRUCTOR",
@@ -77,6 +105,14 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bc-impossible-cast"
   },
   {
+    "key": "BC_NULL_INSTANCEOF",
+    "name": "Correctness - A known null value is checked to see if it is an instance of a type",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bc-null-instanceof",
+    "comment": "LEGACY RULE, do not remove"
+  },
+  {
     "key": "BC_IMPOSSIBLE_CAST_PRIMITIVE_ARRAY",
     "name": "Correctness - Impossible cast involving primitive array",
     "type": "BUG",
@@ -103,13 +139,6 @@
     "type": "BUG",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bc-impossible-instanceof"
-  },
-  {
-    "key": "BC_NULL_INSTANCEOF",
-    "name": "Correctness - A known null value is checked to see if it is an instance of a type",
-    "type": "BUG",
-    "severity": "MAJOR",
-    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bc-null-instanceof"
   },
   {
     "key": "BC_UNCONFIRMED_CAST",
@@ -168,6 +197,14 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bit-ior-of-signed-byte"
   },
   {
+    "key": "BRSA_BAD_RESULTSET_ACCESS",
+    "name": "Correctness - Method attempts to access a result set field with index 0",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#brsa-bad-resultset-access",
+    "comment": "LEGACY RULE, do not remove"
+  },
+  {
     "key": "BIT_SIGNED_CHECK",
     "name": "Bad practice - Check for sign of bitwise operation",
     "type": "CODE_SMELL",
@@ -187,13 +224,6 @@
     "type": "BUG",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#boa-badly-overridden-adapter"
-  },
-  {
-    "key": "BRSA_BAD_RESULTSET_ACCESS",
-    "name": "Correctness - Method attempts to access a result set field with index 0",
-    "type": "BUG",
-    "severity": "MAJOR",
-    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#brsa-bad-resultset-access"
   },
   {
     "key": "BSHIFT_WRONG_ADD_PRIORITY",
@@ -1148,6 +1178,13 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#fl-math-using-float-precision"
   },
   {
+    "key": "FS_BAD_DATE_FORMAT_FLAG_COMBO",
+    "name": "Bad practice - Date-format strings may lead to unexpected behavior",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#fs-bad-date-format-flag-combo"
+  },
+  {
     "key": "GC_UNCHECKED_TYPE_IN_GENERIC_CALL",
     "name": "Bad practice - Unchecked type in generic call",
     "type": "CODE_SMELL",
@@ -1230,6 +1267,13 @@
     "type": "BUG",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#hsc-huge-shared-string-constant"
+  },
+  {
+    "key": "HSM_HIDING_METHOD",
+    "name": "Correctness - Method hiding should be avoided.",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#hsm-hiding-method"
   },
   {
     "key": "IA_AMBIGUOUS_INVOCATION_OF_INHERITED_OR_OUTER_METHOD",
@@ -1554,6 +1598,14 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#jcip-field-isnt-final-in-immutable-class"
   },
   {
+    "key": "LI_LAZY_INIT_INSTANCE",
+    "name": "Multi-threading - Incorrect lazy initialization of instance field",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#li-lazy-init-instance",
+    "comment": "LEGACY RULE, do not remove"
+  },
+  {
     "key": "JLM_JSR166_LOCK_MONITORENTER",
     "name": "Multi-threading - Synchronization performed on Lock",
     "type": "BUG",
@@ -1587,13 +1639,6 @@
     "type": "CODE_SMELL",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#lg-lost-logger-due-to-weak-reference"
-  },
-  {
-    "key": "LI_LAZY_INIT_INSTANCE",
-    "name": "Multi-threading - Incorrect lazy initialization of instance field",
-    "type": "BUG",
-    "severity": "MAJOR",
-    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#li-lazy-init-instance"
   },
   {
     "key": "LI_LAZY_INIT_STATIC",
@@ -2254,6 +2299,14 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#pa-public-array-attribute"
   },
   {
+    "key": "PI_DO_NOT_REUSE_PUBLIC_IDENTIFIERS_INNER_CLASS_NAMES",
+    "name": "Bad practice - Do not reuse public identifiers from JSL as inner name",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#pi-do-not-reuse-public-identifiers-inner-class-names",
+    "comment": "LEGACY RULE, do not remove"
+  },
+  {
     "key": "PA_PUBLIC_MUTABLE_OBJECT_ATTRIBUTE",
     "name": "Bad practice - Mutable object-type field is public",
     "type": "CODE_SMELL",
@@ -2352,6 +2405,14 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#qf-questionable-for-loop"
   },
   {
+    "key": "RCN_REDUNDANT_CHECKED_NULL_COMPARISON",
+    "name": "Style - Redundant comparison to null of previously checked value",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#rcn-redundant-checked-null-comparison",
+    "comment": "LEGACY RULE, do not remove"
+  },
+  {
     "key": "RANGE_ARRAY_INDEX",
     "name": "Correctness - Array index is out of bounds",
     "type": "BUG",
@@ -2378,13 +2439,6 @@
     "type": "BUG",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#range-string-index"
-  },
-  {
-    "key": "RCN_REDUNDANT_CHECKED_NULL_COMPARISON",
-    "name": "Style - Redundant comparison to null of previously checked value",
-    "type": "CODE_SMELL",
-    "severity": "MAJOR",
-    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#rcn-redundant-checked-null-comparison"
   },
   {
     "key": "RCN_REDUNDANT_COMPARISON_OF_NULL_AND_NONNULL_VALUE",
@@ -3052,6 +3106,14 @@
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#st-write-to-static-from-instance-method"
   },
   {
+    "key": "TLW_TWO_LOCK_NOTIFY",
+    "name": "Multi-threading - Notify with two locks held",
+    "type": "BUG",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#tlw-two-lock-notify",
+    "comment": "LEGACY RULE, do not remove"
+  },
+  {
     "key": "SWL_SLEEP_WITH_LOCK_HELD",
     "name": "Multi-threading - Method calls Thread.sleep() with a lock held",
     "type": "BUG",
@@ -3095,14 +3157,14 @@
   },
   {
     "key": "THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
-    "name": "Bad practice - Method lists Exception in its throws clause.",
+    "name": "Bad practice - Method lists Exception in its throws clause, but it could be more specific.",
     "type": "CODE_SMELL",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#throws-method-throws-clause-basic-exception"
   },
   {
     "key": "THROWS_METHOD_THROWS_CLAUSE_THROWABLE",
-    "name": "Bad practice - Method lists Throwable in its throws clause.",
+    "name": "Bad practice - Method lists Throwable in its throws clause, but it could be more specific.",
     "type": "CODE_SMELL",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#throws-method-throws-clause-throwable"
@@ -3113,13 +3175,6 @@
     "type": "CODE_SMELL",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#throws-method-throws-runtimeexception"
-  },
-  {
-    "key": "TLW_TWO_LOCK_NOTIFY",
-    "name": "Multi-threading - Notify with two locks held",
-    "type": "BUG",
-    "severity": "MAJOR",
-    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#tlw-two-lock-notify"
   },
   {
     "key": "TLW_TWO_LOCK_WAIT",
@@ -3337,6 +3392,41 @@
     "type": "CODE_SMELL",
     "severity": "MAJOR",
     "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#usm-useless-subclass-method"
+  },
+  {
+    "key": "US_USELESS_SUPPRESSION_ON_CLASS",
+    "name": "Style - Useless suppression on a class",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#us-useless-suppression-on-class"
+  },
+  {
+    "key": "US_USELESS_SUPPRESSION_ON_FIELD",
+    "name": "Style - Useless suppression on a field",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#us-useless-suppression-on-field"
+  },
+  {
+    "key": "US_USELESS_SUPPRESSION_ON_METHOD",
+    "name": "Style - Useless suppression on a method",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#us-useless-suppression-on-method"
+  },
+  {
+    "key": "US_USELESS_SUPPRESSION_ON_METHOD_PARAMETER",
+    "name": "Style - Useless suppression on a method parameter",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#us-useless-suppression-on-method-parameter"
+  },
+  {
+    "key": "US_USELESS_SUPPRESSION_ON_PACKAGE",
+    "name": "Style - Useless suppression on a package",
+    "type": "CODE_SMELL",
+    "severity": "MAJOR",
+    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#us-useless-suppression-on-package"
   },
   {
     "key": "UUF_UNUSED_FIELD",

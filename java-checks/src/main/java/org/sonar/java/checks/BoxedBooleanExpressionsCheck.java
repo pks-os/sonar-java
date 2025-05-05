@@ -21,9 +21,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 import org.sonar.check.Rule;
 import org.sonar.java.checks.helpers.QuickFixHelper;
@@ -43,13 +45,17 @@ import org.sonar.plugins.java.api.tree.ExpressionTree;
 import org.sonar.plugins.java.api.tree.ForStatementTree;
 import org.sonar.plugins.java.api.tree.IdentifierTree;
 import org.sonar.plugins.java.api.tree.IfStatementTree;
+import org.sonar.plugins.java.api.tree.LambdaExpressionTree;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.Tree.Kind;
 import org.sonar.plugins.java.api.tree.TypeCastTree;
 import org.sonar.plugins.java.api.tree.UnaryExpressionTree;
+import org.sonar.plugins.java.api.tree.VariableTree;
 import org.sonar.plugins.java.api.tree.WhileStatementTree;
 
+import static org.sonar.java.checks.helpers.MethodTreeUtils.lamdaArgumentAt;
+import static org.sonar.java.checks.helpers.MethodTreeUtils.parentMethodInvocationOfArgumentAtPos;
 import static org.sonar.plugins.java.api.semantic.MethodMatchers.ANY;
 
 @Rule(key = "S5411")
@@ -62,10 +68,23 @@ public class BoxedBooleanExpressionsCheck extends BaseTreeVisitor implements Jav
     .ofTypes("java.util.Optional").names("orElse").addParametersMatcher(ANY).build();
 
   private static final String BOOLEAN = "java.lang.Boolean";
+
+  /**
+   * Matcher for methods of the Optional class that take a functional argument consuming the value stored in the Optional, which is known to be always non-null.
+   */
+  private static final MethodMatchers OPTIONAL_METHODS_WITH_LAMBDA_CONSUMING_NON_NULL = MethodMatchers.create().ofTypes("java.util.Optional")
+    .names("filter", "flatMap", "ifPresent", "ifPresentOrElse", "map").withAnyParameters()
+    .build();
+
   private JavaFileScannerContext context;
 
   private static final Map<Tree, IfStatementTree> ifStatementCache = new HashMap<>();
   private static final Map<Symbol, ExpressionTree> firstNullCheckCache = new HashMap<>();
+
+  /**
+   * Symbols we know are non-null, so can safely be used in boolean expressions
+   */
+  private final Set<Symbol> safeSymbols = new HashSet<>();
 
   @Override
   public void scanFile(JavaFileScannerContext context) {
@@ -117,6 +136,19 @@ public class BoxedBooleanExpressionsCheck extends BaseTreeVisitor implements Jav
   }
 
   @Override
+  public void visitLambdaExpression(LambdaExpressionTree lambdaExpressionTree) {
+    VariableTree lambdaFistParameter = lamdaArgumentAt(lambdaExpressionTree, 0);
+    if (lambdaFistParameter != null) {
+      MethodInvocationTree methodInvocationTree = parentMethodInvocationOfArgumentAtPos(lambdaExpressionTree, 0);
+      // parameters of lambdas applied on an Optional are always non-null
+      if (methodInvocationTree != null && OPTIONAL_METHODS_WITH_LAMBDA_CONSUMING_NON_NULL.matches(methodInvocationTree)) {
+        safeSymbols.add(lambdaFistParameter.symbol());
+      }
+    }
+    super.visitLambdaExpression(lambdaExpressionTree);
+  }
+
+  @Override
   public void visitConditionalExpression(ConditionalExpressionTree tree) {
     if (!isSafeBooleanExpression(tree.condition())) {
       scan(tree.trueExpression());
@@ -132,6 +164,10 @@ public class BoxedBooleanExpressionsCheck extends BaseTreeVisitor implements Jav
       // The rule is relaxed if the first usage of the variable is a test against nullness.
       // A more thorough approach would require tracing all possible paths to lookup the test using symbolic execution.
       if (isFirstUsageANullCheck(boxedBoolean)) {
+        return true;
+      }
+      if (boxedBoolean instanceof IdentifierTree identifierTree &&
+        safeSymbols.contains(identifierTree.symbol())) {
         return true;
       }
       QuickFixHelper.newIssue(context)
